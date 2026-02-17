@@ -3,7 +3,8 @@ import { PASSWORD } from '$env/static/private';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-const uri = `mongodb+srv://admin:${PASSWORD}@vehicles.irxpojv.mongodb.net/?appName=Vehicles`;
+const encodedPassword = encodeURIComponent(PASSWORD);
+const uri = `mongodb+srv://admin:${encodedPassword}@vehicles.irxpojv.mongodb.net/?appName=Vehicles`;
 
 let cachedClient: MongoClient | null = null;
 let connectPromise: Promise<MongoClient> | null = null;

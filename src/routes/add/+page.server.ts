@@ -2,7 +2,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import { PASSWORD } from '$env/static/private';
 import { fail } from '@sveltejs/kit';
 
-const uri = `mongodb+srv://admin:${PASSWORD}@vehicles.irxpojv.mongodb.net/?appName=Vehicles`;
+const uri = `mongodb+srv://admin:${encodeURIComponent(PASSWORD)}@vehicles.irxpojv.mongodb.net/?appName=Vehicles`;
 
 let cachedClient: MongoClient | null = null;
 let connectPromise: Promise<MongoClient> | null = null;
