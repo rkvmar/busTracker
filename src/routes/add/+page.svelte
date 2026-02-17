@@ -82,6 +82,11 @@
 			return async ({ result, update }) => {
 				submitting = false;
 
+				if (result.type === 'redirect') {
+					window.location.assign(result.location);
+					return;
+				}
+
 				if (result.type === 'success') {
 					submitSuccess = true;
 					submitMessage = 'Upload complete.';
@@ -91,6 +96,15 @@
 						URL.revokeObjectURL(imagePreviewUrl);
 					}
 					imagePreviewUrl = '';
+					const uploadedVehicleID = result.data?.vehicleID;
+					const uploadedAgency = result.data?.agency;
+					if (uploadedVehicleID && uploadedAgency) {
+						window.location.assign(
+							`${base}/vehicles/${encodeURIComponent(uploadedVehicleID)}?agency=${encodeURIComponent(uploadedAgency)}`
+						);
+					} else if (uploadedVehicleID) {
+						window.location.assign(`${base}/vehicles/${encodeURIComponent(uploadedVehicleID)}`);
+					}
 				} else if (result.type === 'failure') {
 					submitSuccess = false;
 					submitMessage = result.data?.message ?? 'Upload failed. Please try again.';

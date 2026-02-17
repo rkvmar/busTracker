@@ -1,6 +1,6 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import { PASSWORD } from '$env/static/private';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
 const uri = `mongodb+srv://admin:${encodeURIComponent(PASSWORD)}@vehicles.irxpojv.mongodb.net/?appName=Vehicles`;
 
@@ -114,6 +114,7 @@ export const actions = {
 		try {
 			imageURL = await uploadToCatbox(image);
 		} catch (error) {
+			console.error('Catbox upload failed', error);
 			return fail(500, { message: 'Image upload failed.' });
 		}
 
@@ -129,9 +130,13 @@ export const actions = {
 				createdAt: new Date()
 			});
 		} catch (error) {
+			console.error('Database insert failed', error);
 			return fail(500, { message: 'Database insert failed.' });
 		}
 
-		return { success: true, imgURL: imageURL };
+		throw redirect(
+			303,
+			`/vehicles/${encodeURIComponent(vehicleIdResult.value)}?agency=${encodeURIComponent(agencyResult.value)}`
+		);
 	}
 };
