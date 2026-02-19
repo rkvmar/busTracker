@@ -67,6 +67,10 @@ function parseLatitudeLongitude(
 		return { error: 'Location is required.' };
 	}
 
+	if (!latValue.trim() || !longValue.trim()) {
+		return { error: 'Location is required.' };
+	}
+
 	const latitude = Number(latValue);
 	const longitude = Number(longValue);
 

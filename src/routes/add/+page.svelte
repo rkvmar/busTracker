@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { base } from '$app/paths';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	const agencies = [
 		'SamTrans',
@@ -39,6 +39,9 @@
 	let imagePreviewUrl = '';
 	let mapContainer: HTMLDivElement | null = null;
 	let mapReady = false;
+	let locationReady = false;
+
+	$: locationReady = Boolean(lat && long);
 
 	let submitting = false;
 	let submitMessage = '';
@@ -97,6 +100,31 @@
 		}
 	}
 
+	function confirmLocation() {
+		if (marker) {
+			const position = marker.getLatLng();
+			setLocation(position.lat, position.lng);
+			return;
+		}
+
+		if (map) {
+			const center = map.getCenter();
+			setLocation(center.lat, center.lng);
+			return;
+		}
+
+		locationError = 'Map is not ready yet. Please try again in a moment.';
+	}
+
+	function setLocationFromMapCenter() {
+		if (!map) {
+			locationError = 'Map is not ready yet. Please try again in a moment.';
+			return;
+		}
+		const center = map.getCenter();
+		setLocation(center.lat, center.lng);
+	}
+
 	function setLocationFromBrowser() {
 		locationError = '';
 
@@ -151,7 +179,8 @@
 		}
 	}
 
-	onMount(() => {
+	onMount(async () => {
+		await tick();
 		initMap();
 		setLocationFromBrowser();
 
@@ -266,8 +295,8 @@
 		<input type="hidden" name="long" bind:value={long} />
 
 		<div class="actions">
-			<button type="submit" class="primary" disabled={submitting}>
-				{submitting ? 'Uploading…' : 'Upload'}
+			<button type="submit" class="primary" disabled={submitting || !locationReady}>
+				{submitting ? 'Submitting...' : 'Submit'}
 			</button>
 			{#if submitMessage}
 				<p class:success={submitSuccess} class:error={!submitSuccess}>{submitMessage}</p>
@@ -396,6 +425,17 @@
 	.location-map {
 		width: 100%;
 		height: 240px;
+	}
+
+	.coords,
+	.debug {
+		margin: 8px 0 0;
+		font-size: 0.9rem;
+		color: #cfe0ff;
+	}
+
+	.debug {
+		opacity: 0.75;
 	}
 
 	.actions {
